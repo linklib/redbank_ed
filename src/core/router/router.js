@@ -9,7 +9,7 @@ export class Router {
 
     constructor(){      
         
-        window.addEventListener('popstate', () => { //Перехватываем события браузера типа "Назад" и запускаем #handleRouteChange
+        window.addEventListener('popstate', () => { //Перехватываем события браузера типа "Назад" "Вперёд" и запускаем #handleRouteChange
             this.#handleRouteChange()
         })
 
@@ -65,8 +65,8 @@ export class Router {
             })
             document.getElementById('app').innerHTML = this.#layout.render()
         }
-        else { //Иначе - заменяем контентную часть
-            document.getElementById('app').innerHTML = component.render()
+        else { //Иначе - заменяем контентную часть            
+            document.querySelector('main').innerHTML = component.render()
         }        
     }
 
