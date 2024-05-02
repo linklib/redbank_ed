@@ -1,3 +1,4 @@
+import { $R } from "../rquery/rquery.lib";
 import { ROUTES } from "./routes.data";
 import { Layout } from "@/components/layout/layout.component";
 
@@ -56,17 +57,18 @@ export class Router {
     }
 
     #render(){
-        const component = new this.#currentRoute.component() //Соэдаём экземпляр класса компонента страницы  
+        const component = new this.#currentRoute.component().render() //Соэдаём экземпляр класса компонента страницы  
         
         if(!this.#layout) {  //Если шаблон ещё не загружен - создаём экземпляр и передаём в него пропсы: роуты и чилдрена
             this.#layout = new Layout({
                 router: this,
-                children: component.render()
-            })
-            document.getElementById('app').innerHTML = this.#layout.render()
+                children: component
+            }).render()
+            
+            $R('#app').append(this.#layout)            
         }
-        else { //Иначе - заменяем контентную часть            
-            document.querySelector('main').innerHTML = component.render()
+        else { //Иначе - заменяем контентную часть              
+            $R('#content').html('').append(component)         
         }        
     }
 
