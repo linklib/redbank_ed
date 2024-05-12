@@ -1,30 +1,33 @@
-import renderService from "@/core/services/render.service"
-import { $R } from "@/core/rquery/rquery.lib"
-import ChildComponent from "@/core/component/child.component"
-import { Header } from "./header/header.component"
- 
+import ChildComponent from '@/core/component/child.component'
+import { $R } from '@/core/rquery/rquery.lib'
+import renderService from '@/core/services/render.service'
+import { Header } from './header/header.component'
 
-import template from "./layout.template.html"
 import styles from './layout.module.scss'
+import template from './layout.template.html'
 
-export class Layout extends ChildComponent{
-    constructor({router, children}){
-        super()
 
-        this.router = router
-        this.children = children
-    }
+export class Layout extends ChildComponent {
+	constructor( {router, children}) {
+		super()
 
-    render(){ 
-        this.element = renderService.htmlToElement(template,[],styles)
+		this.router = router
+		this.children = children
+		
+	}
 
-        const mainElement = $R(this.element).find('main')
+	render() {
+		this.element = renderService.htmlToElement(template, [], styles)
 
-        const contentContainer = $R(this.element).find('#content')       
-        contentContainer.append(this.children)
+		const mainElement = $R(this.element).find('main')
 
-        mainElement.before(new Header().render()).append(contentContainer.element)
+		const contentContainer = $R(this.element).find('#content')
+		contentContainer.append(this.children)
 
-        return this.element
-    }
+		mainElement.before(new Header({
+			router: this.router
+		}).render()).append(contentContainer.element)
+
+		return this.element
+	}
 }

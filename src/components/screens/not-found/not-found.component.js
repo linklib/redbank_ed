@@ -1,14 +1,10 @@
-import { BaseScreen } from "../../../core/component/base-screen.component"
+import { BaseScreen } from '@/core/component/base-screen.component'
 
 export class NotFound extends BaseScreen {
-
-    constructor(title){  
-        super({title: '404'})
-    }
-
-    render(){
-        changeTitle('Главная страница')
-
-        return '<p>NotFound</p>'
-    }
+	constructor() {
+		super({ title: 'Not Found' })
+	}
+	render() {
+		return '<p>Not found!</p>'
+	}
 }

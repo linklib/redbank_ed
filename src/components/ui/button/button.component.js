@@ -1,29 +1,27 @@
-import ChildComponent from "@/core/component/child.component"
-import renderService from "@/core/services/render.service"
-import { $R } from "@/core/rquery/rquery.lib"
+import ChildComponent from '@/core/component/child.component'
+import { $R } from '@/core/rquery/rquery.lib'
+import renderService from '@/core/services/render.service'
 
-import template from "./button.template.html"
 import styles from './button.module.scss'
+import template from './button.template.html'
 
-export class Button extends ChildComponent {   
-   
-    constructor({children, onClick, variant}){
-        super()
+export class Button extends ChildComponent {
+	constructor({ children, onClick, variant }) {
+		super()
+		if (!children) throw new Error('Children is empty!')
 
-        if(!children) throw new Error('Children is empty!')
-        this.children = children
-        this.onClick = onClick
-        this.variant = variant
-    }
-       
-    render(){
-        this.element = renderService.htmlToElement(template, [], styles)
-        
-        $R(this.element).html(this.children).click(this.onClick)
+		this.children = children
+		this.onClick = onClick
+		this.variant = variant
+	}
 
-        if(this.variant) $R(this.variant).addClass(styles[this.variant])
+	render() {
+		this.element = renderService.htmlToElement(template, [], styles)
 
-        return this.element
-        
-    }
+		$R(this.element).html(this.children).click(this.onClick)
+
+		if (this.variant) $R(this.element).addClass(styles[this.variant])
+
+		return this.element
+	}
 }

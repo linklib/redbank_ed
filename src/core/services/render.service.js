@@ -1,92 +1,97 @@
-import ChildComponent from "../component/child.component"
-
+import ChildComponent from '../component/child.component'
 
 class RenderService {
+	/**
+	 * @param {string} html
+	 * @param {Array} components
+	 * @param {Object} [styles]
+	 * @returns {HTMLElement}
+	 */
+	htmlToElement(html, components = [], styles) {
+		const template = document.createElement('template')
+		template.innerHTML = html.trim()
 
-    /**
-     * @param {string} html
-     * @param {string} components
-     * @param {string} [styles]
-     * @return {HTMLElement}
-    */
-    htmlToElement(html, components = [], styles){
-        const template = document.createElement('template') //Создаём тег-обёртку, его в доме не видно
-        template.innerHTML = html.trim()  //Добавляем в переменную пришедший html, очищенный от лишних пробелов
-        const element = template.content.firstChild // Забираем чистый html код
+		const element = template.content.firstChild
 
-        if(styles) {            
-            this.#applyModuleStyles(styles, element)            
-        } 
-        
-        this.#replaceComponentTags(element, components)
+		if (styles) {
+			this.#applyModuleStyles(styles, element)
+		}
 
-        return element
-    }
+		this.#replaceComponentTags(element, components)
 
-    /**
-     * @param {HTMLElement} parentElement
-     * @param {Array} components
-     * Здесь находим в хтмл все теги, начинающиеся с {component-} и очищаем название тегов от {component-} 
-     */
-    #replaceComponentTags(parentElement, components){
-        const componentTagPattern = /^component-/ //Регулярное выражение, по которому будем искать нужные теги
-        const allElements = parentElement.getElementsByTagName('*') //Запихали все элементы
+		return element
+	}
 
-        for (const element of allElements) { //Обегаем все элементы
-            const elementTagName = element.tagName.toLowerCase()
-            if(componentTagPattern.test(elementTagName)){
-                const componentName = elementTagName
-                .replace(componentTagPattern,'') //Убираем {component}
-                .replace(/-/g,'') //Убираем {-}
+	/**
+	 * @param {HTMLElement} parentElement
+	 * @param {Array} components
+	 */
+	#replaceComponentTags(parentElement, components) {
+		const componentTagPattern = /^component-/
+		const allElements = parentElement.getElementsByTagName('*')
 
-                const foundComponent = components.find(Component => {
-                    const instance = 
-                        Component instanceof ChildComponent ? Component: new Component() //Если элемент является экземпляром ChildComponent, то возвращаем компонент ,а если нет - то создаём экземпляр компонента       
+		for (const element of allElements) {
+			const elementTagName = element.tagName.toLowerCase()
+			if (componentTagPattern.test(elementTagName)) {
+				const componentName = elementTagName
+					.replace(componentTagPattern, '')
+					.replace(/-/g, '')
 
-                    return instance.constructor.name.toLowerCase() === componentName    //constructor.name это по сути название класса. Это проверка на наличие класса
-                })    
+				const foundComponent = components.find(Component => {
+					const instance =
+						Component instanceof ChildComponent ? Component : new Component()						
+console.log('### ',instance);
+					return instance.component.toLowerCase() === componentName
+					//return instance.constructor.name.toLowerCase() === componentName
+				})
+				if (foundComponent) {
+					const componentContent =
+						foundComponent instanceof ChildComponent
+							? foundComponent.render()
+							: new foundComponent().render()
+					element.replaceWith(componentContent)
+				} else {
+					console.error(
+						`Component "${componentName}" not found in the provided components array.`
+					)
+				}
+			}
+		}
+	}
 
-                if(foundComponent){
-                    const componentContent = 
-                    foundComponent instanceof ChildComponent
-                    ? foundComponent.render()
-                    : new foundComponent().render()
-                    element.replaceWith(componentContent)
-                } else{
-                    console.error(
-                        `Component "${componentName} not found in provided component array"`
-                    )
-                }
-            }
-        }
-    }
+	/**
+	 * @param {Object} moduleStyles
+	 * @param {string} element
+	 * @returns {void}
+	 */
+	#applyModuleStyles(moduleStyles, element) {
+		if (!element) return
 
-    /**
-     * @param {Object} moduleStyle
-     * @param {string} element
-     * @return {void}
-     */
-    #applyModuleStyles(moduleStyle,element){
-        if(!element) return
+		const applyStyles = element => {
+			for (const [key, value] of Object.entries(moduleStyles)) {
+				if (element.classList.contains(key)) {
+					element.classList.remove(key)
+					element.classList.add(value)
+				}
+			}
+		}
 
-        const applyStyles = element => { //Обходим объект moduleStyle, вытаскиваем [key,value]
-            for (const [key,value] of Object.entries(moduleStyle)){ 
-                if(element.classList.contains(key)){
-                    element.classList.remove(key)
-                    element.classList.add(value)            
-                }
-            } 
-        }
+		if (element.getAttribute('class')) {
+			applyStyles(element)
+		}
 
-        if(element.getAttribute('class')){ //Это для родительского элемента
-            applyStyles(element)
-        }
-
-        const elements = element.querySelectorAll('*')  //Это для детей
-        elements.forEach(applyStyles)
-
-    }
-
+		const elements = element.querySelectorAll('*')
+		elements.forEach(applyStyles)
+	}
 }
 
 export default new RenderService()
+
+{
+	/* <div class='home'>
+	<h1 class='text'></h1>
+	<component-heading></component-heading>
+	<component-card-info></component-card-info>
+</div>
+ */
+}

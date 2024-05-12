@@ -1,75 +1,72 @@
-import { $R } from "../rquery/rquery.lib";
-import { ROUTES } from "./routes.data";
-import { Layout } from "@/components/layout/layout.component";
+import { Layout } from '@/components/layout/layout.component'
+import { NotFound } from '@/components/screens/not-found/not-found.component'
+
+import { $R } from '../rquery/rquery.lib'
+
+import { ROUTES } from './routes.data'
 
 export class Router {
+	#routes = ROUTES
+	#currentRoute = null
+	#layout = null
 
-    #routes = ROUTES //В класс добавляем список роутов
-    #currentRoute = null
-    #layout = null
+	constructor() {
+		window.addEventListener('popstate', () => {
+			this.#handleRouteChange()
+		})
 
-    constructor(){      
-        
-        window.addEventListener('popstate', () => { //Перехватываем события браузера типа "Назад" "Вперёд" и запускаем #handleRouteChange
-            this.#handleRouteChange()
-        })
+		this.#handleRouteChange()
+		this.#handleLinks()
+	}
 
-        this.#handleRouteChange() //Запускаем метод для отслеживания текущего урла 
-        this.#handleLinks()
-    }
+	#handleLinks() {
+		document.addEventListener('click', event => {
+			const target = event.target.closest('a')
 
-    #handleLinks(){
-        document.addEventListener('click', event => { //Слушатель собтытий: реагирует на клик на ссылку
-            const target = event.target.closest('a')
+			if (target) {
+				event.preventDefault()
+				this.navigate(target.href)
+			}
+		})
+	}
 
-            if(target){ //Если таргет сработал, то отключаем дефолтное поведение ссылки
-                event.preventDefault()
-                this.navigate(target.href)
-            }
-        })
-    }
+	getCurrentPath() {
+		return window.location.pathname
+	}
 
-    getCurrentPath(){
-        return window.location.pathname //Получаем текущий URL
-    }
+	navigate(path) {		
+		if (path !== this.getCurrentPath()) {
+			window.history.pushState({}, '', path)
+			this.#handleRouteChange()
+		}
+	}
 
-    navigate(path){ // Если текущий урл не равен тому, который в таргете, пушим новый урл и запускаем #handleRouteChange
-        if(path !== this.getCurrentPath()){
-            window.history.pushState({},'',path)
-            this.#handleRouteChange()                
-        }
-    }
+	#handleRouteChange() {
+		const path = this.getCurrentPath() || '/'
+		let route = this.#routes.find(route => route.path === path)
 
-    #handleRouteChange(){
-        const path = this.getCurrentPath() || '/' //Присваиваем текущую урлу, если нету - главную страницу 
-        let route = this.#routes.find(route => route.path === path) //Находим в списке роутов тот компонент, который соответствует полученному урлу
+		if (!route) {
+			route = {
+				component: NotFound
+			}
+		}
 
-        
+		this.#currentRoute = route
+		this.#render()
+	}
 
-        if(!route){ //Если соответствующего компонента не найдено - назначаем компонент 404 страницы
-            route = {
-                component: NotFound
-            }
-        }
+	#render() {
+		const component = new this.#currentRoute.component().render()
 
-        this.#currentRoute = route //Присваиваем переменной #currentRoute найденный route        
-        this.#render()
-    }
+		if (!this.#layout) {
+			this.#layout = new Layout({
+				router: this,
+				children: component
+			}).render()
 
-    #render(){
-        const component = new this.#currentRoute.component().render() //Соэдаём экземпляр класса компонента страницы  
-        
-        if(!this.#layout) {  //Если шаблон ещё не загружен - создаём экземпляр и передаём в него пропсы: роуты и чилдрена
-            this.#layout = new Layout({
-                router: this,
-                children: component
-            }).render()
-            
-            $R('#app').append(this.#layout)            
-        }
-        else { //Иначе - заменяем контентную часть              
-            $R('#content').html('').append(component)         
-        }        
-    }
-
+			$R('#app').append(this.#layout)
+		} else {
+			$R('#content').html('').append(component)
+		}
+	}
 }

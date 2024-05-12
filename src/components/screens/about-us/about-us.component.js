@@ -1,11 +1,11 @@
-import { BaseScreen } from "../../../core/component/base-screen.component"
+import { BaseScreen } from '@/core/component/base-screen.component'
 
-export class AboutUs extends BaseScreen{
+export class AboutUs extends BaseScreen {
+	constructor() {
+		super({ title: 'About us' })
+	}
 
-    constructor(title){ 
-        super({title: 'AboutUs'})
-    }
-    render(){
-        return '<p>AboutUs</p>'
-    }
+	render() {
+		return '<p>About us</p>'
+	}
 }
