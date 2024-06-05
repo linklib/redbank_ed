@@ -40,8 +40,8 @@ class RenderService {
 				const foundComponent = components.find(Component => {
 					const instance =
 						Component instanceof ChildComponent ? Component : new Component()						
-console.log('### ',instance);
-					return instance.component.toLowerCase() === componentName
+						
+					return instance.component.toLowerCase() === componentName //Надо добавить параметр component в конструктор компонента. Смотри пример Logo
 					//return instance.constructor.name.toLowerCase() === componentName
 				})
 				if (foundComponent) {
